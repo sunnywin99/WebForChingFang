@@ -103,7 +103,12 @@
 
   // ---------- speech recognition ----------
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (!SR) {
+    if (isIOS) {
+      $('unsupported').innerHTML = 'iPhone／iPad 上只有 <b>Safari</b> 能用語音辨識。請點右上角「⋯」或分享按鈕，選「在 Safari 中打開」，不要用 Chrome、LINE 或 FB 裡的瀏覽器。';
+    }
     $('unsupported').hidden = false;
     micBtn.disabled = true;
     statusEl.textContent = '不支援語音辨識';
@@ -111,6 +116,8 @@
 
   let recognition = null;
   let wantRecording = false;
+  let autoRestart = false; // true when the current session was started by onend, not by a tap
+  let pendingInterim = '';
   let wakeLock = null;
 
   const setUI = (recording, msg) => {
@@ -135,7 +142,9 @@
   const startRecognition = () => {
     recognition = new SR();
     recognition.lang = langEl.value;
-    recognition.continuous = true;
+    // iOS Safari's continuous mode often never marks results final or repeats them,
+    // so on iOS recognize one utterance at a time and restart in onend.
+    recognition.continuous = !isIOS;
     recognition.interimResults = true;
 
     recognition.onstart = () => setUI(true, '正在聆聽…請說話');
@@ -147,6 +156,7 @@
         if (result.isFinal) appendSegment(result[0].transcript);
         else interim += result[0].transcript;
       }
+      pendingInterim = interim;
       interimEl.textContent = interim;
     };
 
@@ -154,7 +164,14 @@
       if (event.error === 'no-speech' || event.error === 'aborted') return;
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         wantRecording = false;
-        setUI(false, '無法使用麥克風：請在瀏覽器設定中允許此網站使用麥克風');
+        releaseWakeLock();
+        if (autoRestart) {
+          setUI(false, '已暫停，請再按一次麥克風繼續');
+        } else if (isIOS) {
+          setUI(false, '無法使用語音辨識：請到「設定 > 一般 > 鍵盤」打開「啟用聽寫」，並到「設定 > Safari > 麥克風」選「詢問」或「允許」');
+        } else {
+          setUI(false, '無法使用麥克風：請在瀏覽器設定中允許此網站使用麥克風');
+        }
         return;
       }
       if (event.error === 'network') {
@@ -166,9 +183,12 @@
 
     // Browsers stop recognition after a pause or a time limit; restart while the user still wants to record.
     recognition.onend = () => {
+      // Some browsers (notably iOS Safari) end without ever marking the last result final; keep that text.
+      if (pendingInterim) appendSegment(pendingInterim);
+      pendingInterim = '';
       interimEl.textContent = '';
       if (wantRecording) {
-        setTimeout(() => { if (wantRecording) startRecognition(); }, 250);
+        setTimeout(() => { if (wantRecording) { autoRestart = true; startRecognition(); } }, 250);
       } else {
         setUI(false, '已停止');
       }
@@ -180,6 +200,7 @@
   const start = () => {
     if (!SR) return;
     wantRecording = true;
+    autoRestart = false;
     setUI(true, '啟動中…');
     requestWakeLock();
     startRecognition();
