@@ -122,6 +122,7 @@
 
   const setUI = (recording, msg) => {
     micBtn.classList.toggle('recording', recording);
+    interimEl.classList.toggle('live', recording);
     micBtn.setAttribute('aria-pressed', String(recording));
     micBtn.setAttribute('aria-label', recording ? '停止錄音' : '開始錄音');
     statusEl.classList.toggle('live', recording);
@@ -188,7 +189,7 @@
       pendingInterim = '';
       interimEl.textContent = '';
       if (wantRecording) {
-        setTimeout(() => { if (wantRecording) { autoRestart = true; startRecognition(); } }, 250);
+        setTimeout(() => { if (wantRecording) { autoRestart = true; startRecognition(); } }, 50);
       } else {
         setUI(false, '已停止');
       }

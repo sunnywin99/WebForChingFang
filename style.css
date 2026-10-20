@@ -131,11 +131,24 @@ textarea {
 }
 #text { min-height: 260px; font-size: 1.1rem; }
 
+/* Live preview of words still being recognized: sits above the text box so it stays in view on phones. */
 .interim {
-  min-height: 1.6em;
-  margin-top: 6px;
+  min-height: 2.8em;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 2px dashed var(--border);
+  font-size: 1.2rem;
+  color: var(--text);
+}
+.interim:empty::before {
+  content: "說話時，文字會先即時出現在這裡";
   color: var(--muted);
-  font-style: italic;
+  font-size: .95rem;
+}
+.interim.live {
+  border-color: var(--rec);
+  background: var(--accent-soft);
 }
 
 .actions {
