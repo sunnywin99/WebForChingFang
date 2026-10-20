@@ -53,7 +53,7 @@ h2 { margin: 0; font-size: 1.05rem; }
 }
 .notice.error { background: #fde8e8; color: #8a1c1c; }
 
-.controls, .transcript, .panel {
+.controls, .transcript, .photos, .panel {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -166,6 +166,56 @@ textarea {
 }
 .actions button:hover { border-color: var(--accent); }
 button.danger { color: var(--danger); background: transparent; }
+
+.pick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border: 2px dashed var(--accent);
+  border-radius: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+.pick svg { width: 24px; height: 24px; fill: currentColor; }
+.pick:hover { background: var(--accent-soft); }
+
+.photo-grid {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+.photo-grid:empty { display: none; }
+.photo-grid li {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.photo-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-grid .remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.photos .hint { margin: 10px 0 0; }
 
 .panel summary { cursor: pointer; font-weight: 600; }
 

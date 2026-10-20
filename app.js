@@ -327,4 +327,64 @@
   });
 
   renderHistory();
+
+  // ---------- photos ----------
+  // Selected photos are kept in memory only, ready for the processing / cloud step later.
+  const photoInput = $('photoInput');
+  const photoGrid = $('photoGrid');
+  const photoCountEl = $('photoCount');
+  const photoActions = $('photoActions');
+  const photos = []; // { file, url }
+
+  const formatSize = (bytes) => (bytes >= 1048576
+    ? `${(bytes / 1048576).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`);
+
+  const renderPhotos = () => {
+    photoGrid.innerHTML = '';
+    photos.forEach((p, idx) => {
+      const li = document.createElement('li');
+      const img = document.createElement('img');
+      img.src = p.url;
+      img.alt = p.file.name;
+      img.loading = 'lazy';
+      const btn = document.createElement('button');
+      btn.className = 'remove';
+      btn.textContent = '×';
+      btn.setAttribute('aria-label', `移除 ${p.file.name}`);
+      btn.addEventListener('click', () => {
+        URL.revokeObjectURL(p.url);
+        photos.splice(idx, 1);
+        renderPhotos();
+      });
+      li.append(img, btn);
+      photoGrid.appendChild(li);
+    });
+    const total = photos.reduce((sum, p) => sum + p.file.size, 0);
+    photoCountEl.textContent = photos.length ? `${photos.length} 張，共 ${formatSize(total)}` : '尚未選擇';
+    photoActions.hidden = photos.length === 0;
+  };
+
+  photoInput.addEventListener('change', () => {
+    const seen = new Set(photos.map((p) => `${p.file.name}|${p.file.size}`));
+    let added = 0;
+    for (const file of photoInput.files) {
+      const key = `${file.name}|${file.size}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      photos.push({ file, url: URL.createObjectURL(file) });
+      added++;
+    }
+    photoInput.value = ''; // allow picking the same photos again after removing them
+    renderPhotos();
+    if (added) showToast(`已加入 ${added} 張相片`);
+  });
+
+  $('addMoreBtn').addEventListener('click', () => photoInput.click());
+  $('clearPhotosBtn').addEventListener('click', () => {
+    if (!confirm('確定移除全部相片？（手機裡的原始相片不會被刪除）')) return;
+    photos.forEach((p) => URL.revokeObjectURL(p.url));
+    photos.length = 0;
+    renderPhotos();
+  });
 })();

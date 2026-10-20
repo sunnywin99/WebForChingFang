@@ -53,6 +53,24 @@
       </div>
     </section>
 
+    <section class="photos">
+      <div class="bar">
+        <h2>相片</h2>
+        <span id="photoCount" class="count">尚未選擇</span>
+      </div>
+      <label class="pick" for="photoInput">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 7h-2.2l-1.4-2H8.6L7.2 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-7 11a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+        選擇相片（可多選）
+      </label>
+      <input type="file" id="photoInput" accept="image/*" multiple hidden>
+      <ul id="photoGrid" class="photo-grid"></ul>
+      <div class="actions" id="photoActions" hidden>
+        <button id="addMoreBtn">再加相片</button>
+        <button id="clearPhotosBtn" class="danger">全部移除</button>
+      </div>
+      <p class="hint">相片目前只在這個畫面上預覽，還不會上傳；重新整理頁面後需要重選。</p>
+    </section>
+
     <details class="panel">
       <summary>自訂詞彙修正（專有名詞常被聽錯時使用）</summary>
       <p class="hint">每行一筆，格式：<code>聽錯的字=正確的字</code>。辨識完成後會自動替換。</p>
